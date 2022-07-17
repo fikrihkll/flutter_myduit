@@ -5,6 +5,7 @@ import 'package:myduit/features/presentation/pages/route.dart' as route;
 
 
 void main() async {
+  await WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
