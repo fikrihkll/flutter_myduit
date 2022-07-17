@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "750990775732-vc06v3s37mlidb8105vs4eauqpgks31r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.myduit",
+            "certificate_hash": "27527baafc4b0f951cb5b2a1a9eb519ca807a7b3"
+          }
+        },
+        {
           "client_id": "750990775732-dqoqpbel2sbcsjfetm7dvt5f8bg45p4b.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -30,6 +38,13 @@
             {
               "client_id": "750990775732-dqoqpbel2sbcsjfetm7dvt5f8bg45p4b.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "750990775732-a14gc1b0frccodnfelg0b07pm5irkpn0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.myduit"
+              }
             }
           ]
         }
