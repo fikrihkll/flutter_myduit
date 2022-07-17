@@ -65,6 +65,7 @@ class DefaultFirebaseOptions {
     projectId: 'serplet-8aa23',
     databaseURL: 'https://serplet-8aa23-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'serplet-8aa23.appspot.com',
+    androidClientId: '750990775732-vc06v3s37mlidb8105vs4eauqpgks31r.apps.googleusercontent.com',
     iosClientId: '750990775732-a14gc1b0frccodnfelg0b07pm5irkpn0.apps.googleusercontent.com',
     iosBundleId: 'com.example.myduit',
   );
