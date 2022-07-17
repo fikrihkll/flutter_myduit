@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "750990775732",
+    "firebase_url": "https://serplet-8aa23-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "serplet-8aa23",
+    "storage_bucket": "serplet-8aa23.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:750990775732:android:430c6353ad8825cac54ee1",
+        "android_client_info": {
+          "package_name": "com.example.myduit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "750990775732-dqoqpbel2sbcsjfetm7dvt5f8bg45p4b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARoeOh7p8TeFGG9WT_G683mHd8GbtXaXM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "750990775732-dqoqpbel2sbcsjfetm7dvt5f8bg45p4b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
