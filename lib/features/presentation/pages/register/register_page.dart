@@ -124,20 +124,17 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Future<void> _registerUser(
-      NavigatorState nav, String name, String email, String password) async {
-    //functionnya disini
-    var result =
-        await FirebaseUtil.signUpEmailPassword(email, password, context);
+  Future<void> _registerUser(NavigatorState nav, String name, String email, String password) async {
+    var result = await FirebaseUtil.signUpEmailPassword(email, password, context);
     if (result != null) {
+      var user = result.user!;
       await authenticationRepository.storeNewUserData(
-          UserModel(id: "", name: name, email: email, timestamp: ""));
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Success")));
+          UserModel(id: "", name: user.displayName!, email: user.email!, timestamp: "")
+      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Success")));
       nav.pushNamedAndRemoveUntil(route.homePage, (route) => false);
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Error")));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error")));
     }
   }
 }

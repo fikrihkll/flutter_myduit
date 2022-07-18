@@ -26,8 +26,7 @@ class FirebaseUtil {
     return null;
   }
 
-  static Future<UserCredential?> signUpEmailPassword(
-      String email, String password, BuildContext context) async {
+  static Future<UserCredential?> signUpEmailPassword(String email, String password, BuildContext context) async {
     try {
       final credential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -50,6 +49,31 @@ class FirebaseUtil {
       }
     } catch (e) {
       print(e);
+    }
+    return null;
+  }
+
+  static Future<UserCredential?> signInWithEmail(String email, String password, BuildContext context) async {
+    try {
+      final credential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      UserCredential userCredential = credential;
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("No user found for that email.")));
+      } else if (e.code == 'wrong-password') {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Wrong password provided for that user.")));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("$e"),));
     }
     return null;
   }
