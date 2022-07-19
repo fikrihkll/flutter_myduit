@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:myduit/features/presentation/pages/detail/detail_page.dart';
+import 'package:myduit/core/firebase_util.dart';
 import 'package:myduit/features/presentation/pages/route.dart' as route;
 
 class HomePage extends StatefulWidget {
@@ -182,7 +182,19 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text("Home Page")
+        title: Text("Home Page"),
+        actions: <Widget>[
+          IconButton(
+              onPressed: () {
+                FirebaseUtil.signOut();
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("See you later!")));
+                Navigator.of(context).pushNamedAndRemoveUntil(route.loginPage, (route) => false);
+              },
+              icon: Icon(
+                Icons.logout,
+                color: Colors.white,
+              ))
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
