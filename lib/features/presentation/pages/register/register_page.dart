@@ -129,7 +129,7 @@ class _RegisterPageState extends State<RegisterPage> {
     if (result != null) {
       var user = result.user!;
       await authenticationRepository.storeNewUserData(
-          UserModel(id: "", name: user.displayName!, email: user.email!, timestamp: "")
+          UserModel(id: user.uid, name: name, email: user.email!, timestamp: "")
       );
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Success")));
       nav.pushNamedAndRemoveUntil(route.homePage, (route) => false);
