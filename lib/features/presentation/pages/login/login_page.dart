@@ -85,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
         Expanded(
           child: ElevatedButton(
               onPressed: () {
-
+                Navigator.of(context).pushNamed(route.registerPage);
               },
               child: const Text(
                 "Register",
@@ -104,9 +104,8 @@ class _LoginPageState extends State<LoginPage> {
       children: [
         Expanded(
             child: ElevatedButton(
-
                 onPressed: () {
-
+                  _signInWithEmail(Navigator.of(context), _emailController.text, _passController.text, context);
                 },
                 child: const Text(
                     "Login",
@@ -159,6 +158,16 @@ class _LoginPageState extends State<LoginPage> {
           UserModel(id: "", name: user.displayName!, email: user.email!, timestamp: "")
         );
         navigator.pushNamed(route.homePage);
+      }
+    }
+  }
+
+  Future<void> _signInWithEmail(NavigatorState nav, String email, String pass, BuildContext context) async{
+    var result = await FirebaseUtil.signInWithEmail(email, pass, context);
+    if (result != null && result.user != null && result.user!.email != null) {
+      if(await authenticationRepository.isUserExist(result.user!.email!)) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Login successful")));
+        nav.pushNamedAndRemoveUntil(route.homePage, (route) => false);
       }
     }
   }
