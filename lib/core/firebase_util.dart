@@ -77,4 +77,9 @@ class FirebaseUtil {
     }
     return null;
   }
+
+  static signOut() async {
+    await FirebaseAuth.instance.signOut();
+
+  }
 }
