@@ -26,16 +26,20 @@ class ExpenseModel {
   });
 
   static Map<String, dynamic> toFirestore(ExpenseModel model){
-    return {
+    var dataModel = {
       "id": model.id.isEmpty ? null : model.id,
       "category": model.category,
-      "nominal": model.nominal,
+      "nominal": int.parse(model.nominal),
       "description": model.description,
       "date": model.date,
       "monthly_date_code": model.monthlyDateCode,
       "daily_date_code": model.dailyDateCode,
-      "timestamp": model.timestamp.isEmpty ? null : model.timestamp,
+      "timestamp": model.timestamp.isEmpty ? FieldValue.serverTimestamp() : null,
       "updated_at": model.updated_at.isEmpty ? FieldValue.serverTimestamp() : null,
     };
+    if (dataModel["id"] == null)  {
+      dataModel.remove("id");
+    }
+    return dataModel;
   }
 }
