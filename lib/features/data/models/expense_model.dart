@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class ExpenseModel {
   final String id;
   String category;
-  int nominal;
+  String nominal;
   String description;
+  String date;
   String monthlyDateCode;
   String dailyDateCode;
   final String userId;
@@ -14,10 +17,25 @@ class ExpenseModel {
       required this.category,
       required this.nominal,
       required this.description,
+      required this.date,
       required this.monthlyDateCode,
       required this.dailyDateCode,
       required this.userId,
       required this.timestamp,
       required this.updated_at
   });
+
+  static Map<String, dynamic> toFirestore(ExpenseModel model){
+    return {
+      "id": model.id.isEmpty ? null : model.id,
+      "category": model.category,
+      "nominal": model.nominal,
+      "description": model.description,
+      "date": model.date,
+      "monthly_date_code": model.monthlyDateCode,
+      "daily_date_code": model.dailyDateCode,
+      "timestamp": model.timestamp.isEmpty ? null : model.timestamp,
+      "updated_at": model.updated_at.isEmpty ? FieldValue.serverTimestamp() : null,
+    };
+  }
 }
