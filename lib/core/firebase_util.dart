@@ -80,6 +80,5 @@ class FirebaseUtil {
 
   static signOut() async {
     await FirebaseAuth.instance.signOut();
-
   }
 }

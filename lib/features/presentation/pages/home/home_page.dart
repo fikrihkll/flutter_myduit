@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:myduit/core/firebase_util.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:myduit/features/data/models/expense_model.dart';
+import 'package:myduit/features/data/repositories/expense_repository.dart';
+import 'package:myduit/features/presentation/widgets/datePicker_widget.dart';
 import 'package:myduit/features/presentation/pages/route.dart' as route;
 
 class HomePage extends StatefulWidget {
@@ -10,170 +14,419 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String? name;
+  // String date = "${datePick}/${_selectedDate.value.year}";
+  final TextEditingController _nominalController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
+  late ExpenseRepository expenseRepository;
 
-  TextEditingController inputController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
 
-  List<String> listNama = [];
-
-  void onButtonClicked() {
-    listNama.add(inputController.text);
-    setState(() {});
+    expenseRepository = ExpenseRepository(firestore: FirebaseFirestore.instance);
   }
 
-  Widget sectionGambar() {
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.only(top: 32),
-          child: Text(
-            "Gambar",
-            style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold
-            ),
-          ),
-        ),
-        Image.network("https://avatars.githubusercontent.com/u/57880863?v=4"),
-        Image.network("https://avatars.githubusercontent.com/u/57880863?v=4"),
-      ],
+  Widget _helloUser(){
+    return SafeArea(
+      top: true,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              Text(
+                "Hello, $name glad to see you back!",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
     );
   }
 
-  Widget sectionInput() {
-    return Column(
-      children: [
-        Text("halo 1"),
-        Text("halo 2"),
-        Row(
-          children: [
-            Text("halo 3"),
-            SizedBox(
-              width: 32,
+  Widget _buildTodayExpense(){
+    return InkWell(
+      borderRadius: BorderRadius.all(Radius.circular(16)),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.black38,
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Column(
+                children:[
+                  Text(
+                    "Today's expense",
+                    style: TextStyle(
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 32,),
+              Column(
+                children: [
+                  Text("Rp 12.000"),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      onTap: () {},
+    );
+  }
+
+  Widget _buildThisMonthExpense(){
+    return InkWell(
+      borderRadius: BorderRadius.all(Radius.circular(16)),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.black38,
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Row(
+                children:[
+                  Text(
+                    "This month's expense",
+                    style: TextStyle(
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 24,),
+              Row(
+                children: [
+                  Text(
+                    "Rp 12.000",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 24,),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {  },
+                      child: Text(
+                          "Check Logs"
+                      ),
+                      style: ButtonStyle(
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+      onTap: () {},
+    );
+  }
+
+  Widget _buildInsertExpense(){
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black38,
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Row(
+              children:[
+                Text(
+                  "Insert your expense",
+                  style: TextStyle(
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ),
-            Text("halo 4"),
+            SizedBox(height: 8,),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: _nominalController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  hintText: "Amount",
+                  labelText: "Amount",
+                ),
+              ),
+            ),
+            SizedBox(height: 8,),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: _descController,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  hintText: "Description",
+                  labelText: "Description",
+                ),
+              ),
+            ),
+            SizedBox(height: 8,),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: DatePicker(restorationId: 'home'),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 8,),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Category"),
+                  SizedBox(height: 12,),
+                  SizedBox(
+                    height: 50,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        InkWell(
+                          onTap: () {},
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white12,
+                                width: 1,
+                              )
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.fastfood_rounded,
+                                  size: 24,
+                                ),
+                                SizedBox(width: 4,),
+                                Text("Meal"),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        InkWell(
+                          onTap: () {},
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white12,
+                                width: 1,
+                              )
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.fastfood_rounded,
+                                  size: 24,
+                                ),
+                                SizedBox(width: 4,),
+                                Text("Meal"),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        InkWell(
+                          onTap: () {},
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white12,
+                                width: 1,
+                              )
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.fastfood_rounded,
+                                  size: 24,
+                                ),
+                                SizedBox(width: 4,),
+                                Text("Meal"),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        InkWell(
+                          onTap: () {},
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white12,
+                                width: 1,
+                              )
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.fastfood_rounded,
+                                  size: 24,
+                                ),
+                                SizedBox(width: 4,),
+                                Text("Meal"),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+            SizedBox(height: 24,),
+            InkWell(
+              onTap: () {},
+              borderRadius: BorderRadius.circular(12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // _insertExpense(
+                        //   "",
+                        //   "Meal",
+                        //   _nominalController.text,
+                        //   _descController.text,
+                        //   ,
+                        //   monthCode,
+                        //   dailyCode,
+                        //   uid,
+                        //   timestamp,
+                        //   updated_at,
+                        //   context),
+                      },
+                      child: Text(
+                          "Save"
+                      ),
+                      style: ButtonStyle(
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
           ],
         ),
-        Padding(
-          padding: EdgeInsets.all(16),
-          child: TextField(
-            decoration: InputDecoration(
-                hintText: "Nama",
-                labelText: "Nama"
-            ),
-            controller: inputController,
-          ),
-        ),
-        MaterialButton(
-          onPressed: () {
-            onButtonClicked();
-          },
-          color: Colors.blue,
-          child: Text(
-            "Press Me",
-            style: TextStyle(
-                color: Colors.white
-            ),
-          ),
-        ),
-        Text(inputController.text),
-        ListView.builder(
-            primary: false,
-            shrinkWrap: true,
-            itemCount: listNama.length,
-            itemBuilder: (context, position){
-              return itemList2(position);
-            })
-      ],
+      ),
     );
   }
 
-  Widget sectionList() {
-    return Column(
-      children: [
-        SizedBox(
-          height: 32,
-        ),
-        Text(
-          "List",
-          style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold
-          ),
-        ),
-        ListView.builder(
-            primary: false, // Matiin Scroll
-            shrinkWrap: true, // Menjadikan Height List sebanyak item
-            itemCount: 5,
-            itemBuilder: (context, position) {
-              return itemList(position);
-            }
-        )
-      ],
-    );
-  }
-
-  Widget itemList2(int positionList) {
+  Widget _buildLogList(){
     return Container(
-      padding: EdgeInsets.all(8),
-      margin: EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.blue,
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.9),
-            spreadRadius: 5,
-            blurRadius: 5,
-            offset: const Offset(0, 8),
-          )
-        ],
+        color: Colors.black38,
+        borderRadius: BorderRadius.all(Radius.circular(16)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            "${listNama[positionList]}",
-            style: TextStyle(
-                color: Colors.white
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Row(
+              children: [
+                Text(
+                  "Recent expense",
+                  style: TextStyle(
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget itemList(int positionList) {
-    return Container(
-      padding: EdgeInsets.all(8),
-      margin: EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.blue,
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.9),
-            spreadRadius: 5,
-            blurRadius: 5,
-            offset: const Offset(0, 8),
-          )
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            "Burger $positionList",
-            style: TextStyle(
-                color: Colors.white
+            SizedBox(height: 16,),
+            InkWell(
+              onTap: () {},
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(width: 1, color: Colors.white12),
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
+                padding: EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Meal",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "Rp 30.000",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 6,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Ayam geprek 2"),
+                        Text("21 Jul 2022, 15.40 PM"),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          Text(
-            "Rp.12.000",
-            style: TextStyle(
-                color: Colors.white
-            ),
-          )
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -181,37 +434,55 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Home Page"),
-        actions: <Widget>[
-          IconButton(
-              onPressed: () {
-                FirebaseUtil.signOut();
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("See you later!")));
-                Navigator.of(context).pushNamedAndRemoveUntil(route.loginPage, (route) => false);
-              },
-              icon: Icon(
-                Icons.logout,
-                color: Colors.white,
-              ))
-        ],
-      ),
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            sectionInput(),
-            sectionGambar(),
-            sectionList(),
-            MaterialButton(
-                child: Text("MOVE ON"),
-                onPressed: () {
-                  Navigator.pushNamed(context, route.detailPage);
-                }
-            )
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _helloUser(),
+              SizedBox(height: 32,),
+              _buildTodayExpense(),
+              SizedBox(height: 12,),
+              _buildThisMonthExpense(),
+              SizedBox(height: 12,),
+              _buildLogList(),
+              SizedBox(height: 12,),
+              _buildInsertExpense(),
+              SizedBox(height: 12,),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Future<void> showDatePicker() async {
+    // var result = await showDatePicker(
+    //     context: context,
+    //     initialDate: DateTime.now(),
+    //     firstDate: DateTime(DateTime.now().year-1),
+    //     lastDate: DateTime(DateTime.now().year+1));
+  }
+
+  Future<void> _insertExpense(String id, String category, String nominal, String desc, String date, String monthCode, String dailyCode, String uid, String timestamp, String updated_at, BuildContext context) async {
+    if (category != null && nominal != null && desc != null) {
+      await expenseRepository.storeInsertExpense(
+        ExpenseModel(
+          id: id,
+          category: category,
+          nominal: nominal,
+          description: desc,
+          date: date,
+          monthlyDateCode: monthCode,
+          dailyDateCode: dailyCode,
+          userId: uid,
+          timestamp: "",
+          updated_at: "")
+      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Insert successful")));
+    } else if (category == null && nominal == null && desc == null){
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Fill the inputs")));
+    }
   }
 }

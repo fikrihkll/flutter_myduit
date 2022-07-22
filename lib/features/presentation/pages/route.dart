@@ -8,7 +8,6 @@ const homePage = "home_page";
 const detailPage = "detail_page";
 const loginPage = "login_page";
 const registerPage = "register_page";
-const cobaPage = "coba_page";
 
 Route<dynamic> controller(RouteSettings settings) {
   switch (settings.name) {
