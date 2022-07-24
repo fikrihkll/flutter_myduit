@@ -80,9 +80,11 @@ class FirebaseUtil {
 
   static signOut() async {
     await FirebaseAuth.instance.signOut();
+
   }
 
   static String getUID() {
     return FirebaseAuth.instance.currentUser!.uid;
+
   }
 }
