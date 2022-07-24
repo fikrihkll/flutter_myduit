@@ -34,6 +34,7 @@ class ExpenseModel {
       "date": model.date,
       "monthly_date_code": model.monthlyDateCode,
       "daily_date_code": model.dailyDateCode,
+      "userID": model.userId,
       "timestamp": model.timestamp.isEmpty ? FieldValue.serverTimestamp() : null,
       "updated_at": model.updated_at.isEmpty ? FieldValue.serverTimestamp() : null,
     };
