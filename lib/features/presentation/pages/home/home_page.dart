@@ -3,7 +3,7 @@ import 'package:myduit/core/firebase_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myduit/features/data/models/expense_model.dart';
 import 'package:myduit/features/data/repositories/expense_repository.dart';
-import 'package:myduit/features/presentation/widgets/datePicker_widget.dart';
+import 'package:myduit/features/presentation/pages/home/category_widget.dart';
 import 'package:myduit/features/presentation/pages/route.dart' as route;
 
 class HomePage extends StatefulWidget {
@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController _nominalController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
   late ExpenseRepository expenseRepository;
+  int selectedCategoryPosition = -1;
 
   @override
   void initState() {
@@ -219,89 +220,27 @@ class _HomePageState extends State<HomePage> {
                   Text("Category"),
                   SizedBox(height: 12,),
                   SizedBox(
-                    height: 50,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        SizedBox(width: 8),
-                        InkWell(
-                          onTap: () {},
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.white12,
-                                width: 1,
-                              )
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.fastfood_rounded,
-                                  size: 24,
-                                ),
-                                SizedBox(width: 4,),
-                                Text("Meal"),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        InkWell(
-                          onTap: () {},
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.white12,
-                                width: 1,
-                              )
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.fastfood_rounded,
-                                  size: 24,
-                                ),
-                                SizedBox(width: 4,),
-                                Text("Meal"),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        InkWell(
-                          onTap: () {},
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.white12,
-                                width: 1,
-                              )
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.fastfood_rounded,
-                                  size: 24,
-                                ),
-                                SizedBox(width: 4,),
-                                Text("Meal"),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                      ],
-                    ),
-                  )
+                height: 50,
+                child: ListView.builder(
+                  itemBuilder: ((context, index) {
+                    final ExpenseCategory categoryList = categoryNameList[index];
+                    return Padding(
+                      padding: EdgeInsets.only(left: 4, right: 4),
+                      child: CategoryWidget(
+                        itemPosition: index,
+                        isSelected: selectedCategoryPosition == index,
+                        category: categoryList,
+                        onAreaClicked: (itemPosition){
+                          selectedCategoryPosition = itemPosition;
+                          setState(() {});
+                        },
+                      ),
+                    );
+                  }),
+                  itemCount: categoryNameList.length,
+                  scrollDirection: Axis.horizontal,
+                ),
+              ),
                 ],
               ),
             ),
@@ -316,7 +255,7 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () {
                         _insertExpense(
                           "",
-                          "Meal",
+                          categoryNameList[selectedCategoryPosition].name,
                           _nominalController.text,
                           _descController.text,
                           dateText,

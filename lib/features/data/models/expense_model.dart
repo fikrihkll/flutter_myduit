@@ -43,3 +43,25 @@ class ExpenseModel {
     return dataModel;
   }
 }
+
+class ExpenseCategory {
+  String name;
+
+  ExpenseCategory(this.name);
+}
+
+var categoryNameList = [
+  ExpenseCategory('Meal'),
+  ExpenseCategory('Food'),
+  ExpenseCategory('Drink'),
+  ExpenseCategory('Laundry'),
+  ExpenseCategory('E-Money'),
+  ExpenseCategory('Transportation'),
+  ExpenseCategory('Tools'),
+  ExpenseCategory('Toiletries'),
+  ExpenseCategory('Electricity'),
+  ExpenseCategory('Daily Needs'),
+  ExpenseCategory('Subscription'),
+  ExpenseCategory('Shopping'),
+  ExpenseCategory('Others'),
+];

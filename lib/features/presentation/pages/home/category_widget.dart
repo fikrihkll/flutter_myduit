@@ -1,34 +1,45 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:myduit/core/icon_util.dart';
+import 'package:myduit/features/data/models/expense_model.dart';
 
 class CategoryWidget extends StatelessWidget {
-  final int selectedItemPosition;
+  final Function(int position) onAreaClicked;
   final int itemPosition;
+  final ExpenseCategory category;
+  final bool isSelected;
 
-  const CategoryWidget({Key? key}) : super(key: key);
+  const CategoryWidget({Key? key, required this.itemPosition, required this.category, required this.onAreaClicked, required this.isSelected}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        onAreaClicked(itemPosition);
+      },
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
+            border: isSelected ?
+            Border.all(
+              color: Colors.lightBlue,
+              width: 2,
+            )
+                : Border.all(
               color: Colors.white12,
               width: 1,
             )
         ),
         child: Row(
-          children: [
+          children: <Widget>[
             Icon(
-              Icons.fastfood_rounded,
+              IconUtil.getIconFromString(category.name),
               size: 24,
             ),
             SizedBox(width: 4,),
-            Text("Meal"),
+            Text(category.name),
           ],
         ),
       ),
