@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:myduit/core/firebase_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myduit/features/data/models/expense_model.dart';
 import 'package:myduit/features/data/repositories/expense_repository.dart';
 import 'package:myduit/features/presentation/pages/home/category_widget.dart';
+import 'package:myduit/features/presentation/pages/home/log_widget.dart';
 import 'package:myduit/features/presentation/pages/route.dart' as route;
 
 class HomePage extends StatefulWidget {
@@ -23,11 +26,18 @@ class _HomePageState extends State<HomePage> {
   late ExpenseRepository expenseRepository;
   int selectedCategoryPosition = -1;
 
+  List<ExpenseModel> listExpense = [];
+
   @override
   void initState() {
     super.initState();
 
-    expenseRepository = ExpenseRepository(firestore: FirebaseFirestore.instance);
+    expenseRepository = ExpenseRepository(
+        firestore: FirebaseFirestore.instance,
+        firebaseAuth: FirebaseAuth.instance
+    );
+    name = FirebaseAuth.instance.currentUser!.displayName;
+    fetchData();
   }
 
   Widget _helloUser(){
@@ -131,7 +141,9 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {  },
+                      onPressed: () {
+                        Navigator.pushNamed(context, route.logPage);
+                      },
                       child: Text(
                           "Check Logs"
                       ),
@@ -284,7 +296,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildLogList(){
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.black38,
         borderRadius: BorderRadius.all(Radius.circular(16)),
       ),
@@ -295,7 +307,7 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Row(
-              children: [
+              children: const [
                 Text(
                   "Recent expense",
                   style: TextStyle(
@@ -304,75 +316,59 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            SizedBox(height: 16,),
-            InkWell(
-              onTap: () {},
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(width: 1, color: Colors.white12),
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                ),
-                padding: EdgeInsets.all(12),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Meal",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          "Rp 30.000",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 6,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Ayam geprek 2"),
-                        Text("21 Jul 2022, 15.40 PM"),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            const SizedBox(height: 16,),
+            ListView.builder(
+                primary: false,
+                shrinkWrap: true,
+                itemCount: listExpense.length,
+                itemBuilder: (context, position) {
+                  if (listExpense.isEmpty) {
+                    return const Center(child: CupertinoActivityIndicator());
+                  } else {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: LogWidget(expense: listExpense[position]),
+                    );
+                  }
+                }
+            )
           ],
         ),
       ),
     );
   }
 
+  Future<void> fetchData() async {
+    listExpense = await expenseRepository.getCurrentExpense(10);
+    setState(() {
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _helloUser(),
-              SizedBox(height: 32,),
-              _buildTodayExpense(),
-              SizedBox(height: 12,),
-              _buildThisMonthExpense(),
-              SizedBox(height: 12,),
-              _buildLogList(),
-              SizedBox(height: 12,),
-              _buildInsertExpense(),
-              SizedBox(height: 12,),
-            ],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await fetchData();
+      },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _helloUser(),
+                SizedBox(height: 32,),
+                _buildTodayExpense(),
+                SizedBox(height: 12,),
+                _buildThisMonthExpense(),
+                SizedBox(height: 12,),
+                _buildInsertExpense(),
+                SizedBox(height: 12,),
+                _buildLogList(),
+              ],
+            ),
           ),
         ),
       ),
@@ -399,7 +395,7 @@ class _HomePageState extends State<HomePage> {
         ExpenseModel(
           id: id,
           category: category,
-          nominal: nominal,
+          nominal: int.parse(nominal),
           description: desc,
           date: date,
           monthlyDateCode: monthCode,
@@ -408,10 +404,11 @@ class _HomePageState extends State<HomePage> {
           timestamp: "",
           updated_at: "")
       );
+      fetchData();
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Insert successful")));
-      _descController.clear();
-      _nominalController.clear();
-      dateText = "Select date";
+      // _descController.clear();
+      // _nominalController.clear();
+      // dateText = "Select date";
     } else if (category == null && nominal == null && desc == null){
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Fill the inputs")));
     }

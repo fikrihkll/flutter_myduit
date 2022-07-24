@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class ExpenseModel {
   final String id;
   String category;
-  String nominal;
+  int nominal;
   String description;
   String date;
   String monthlyDateCode;
@@ -25,23 +25,42 @@ class ExpenseModel {
       required this.updated_at
   });
 
-  static Map<String, dynamic> toFirestore(ExpenseModel model){
+  static Map<String, dynamic> toFirestore(ExpenseModel model, {bool isUpdate = false}){
+
     var dataModel = {
       "id": model.id.isEmpty ? null : model.id,
       "category": model.category,
-      "nominal": int.parse(model.nominal),
+      "nominal": model.nominal,
       "description": model.description,
       "date": model.date,
       "monthly_date_code": model.monthlyDateCode,
       "daily_date_code": model.dailyDateCode,
-      "userID": model.userId,
+      "user_id": model.userId,
       "timestamp": model.timestamp.isEmpty ? FieldValue.serverTimestamp() : null,
       "updated_at": model.updated_at.isEmpty ? FieldValue.serverTimestamp() : null,
     };
     if (dataModel["id"] == null)  {
       dataModel.remove("id");
     }
+    if (isUpdate) {
+      dataModel.remove("timestamp");
+    }
     return dataModel;
+  }
+  
+  factory ExpenseModel.fromFirestore(QueryDocumentSnapshot doc) {
+    return ExpenseModel(
+        id: doc.id,
+        category: doc.get("category"),
+        nominal: doc.get("nominal") is String ? int.parse(doc.get("nominal")) : doc.get("nominal"),
+        description: doc.get("description"),
+        date: doc.get("date"),
+        monthlyDateCode: doc.get("monthly_date_code"),
+        dailyDateCode: doc.get("daily_date_code"),
+        userId: doc.get("user_id"),
+        timestamp: (doc.get("timestamp") as Timestamp).toDate().toString(),
+        updated_at: (doc.get("timestamp") as Timestamp).toDate().toString()
+    );
   }
 }
 

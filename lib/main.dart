@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       title: 'My Duit',
       theme: ThemeData.dark(),
       onGenerateRoute: route.controller,
-      initialRoute: route.loginPage,
+      initialRoute: route.splashPage,
     );
   }
 }
