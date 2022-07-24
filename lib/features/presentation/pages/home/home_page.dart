@@ -3,7 +3,7 @@ import 'package:myduit/core/firebase_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myduit/features/data/models/expense_model.dart';
 import 'package:myduit/features/data/repositories/expense_repository.dart';
-import 'package:myduit/features/presentation/widgets/datePicker_widget.dart';
+import 'package:myduit/features/presentation/pages/home/category_widget.dart';
 import 'package:myduit/features/presentation/pages/route.dart' as route;
 
 class HomePage extends StatefulWidget {
@@ -15,10 +15,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String? name;
-  // String date = "${datePick}/${_selectedDate.value.year}";
+  String dateText = "Select date";
+  late String monthlyDateCode;
+  late String dailyDateCode;
   final TextEditingController _nominalController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
   late ExpenseRepository expenseRepository;
+  int selectedCategoryPosition = -1;
 
   @override
   void initState() {
@@ -198,7 +201,12 @@ class _HomePageState extends State<HomePage> {
               child: Row(
                 children: [
                   Expanded(
-                    child: DatePicker(restorationId: 'home'),
+                    child: OutlinedButton(
+                      onPressed: () {
+                        showDate();
+                      },
+                      child: Text(dateText),
+                    ),
                   ),
                 ],
               ),
@@ -212,113 +220,27 @@ class _HomePageState extends State<HomePage> {
                   Text("Category"),
                   SizedBox(height: 12,),
                   SizedBox(
-                    height: 50,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        InkWell(
-                          onTap: () {},
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.white12,
-                                width: 1,
-                              )
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.fastfood_rounded,
-                                  size: 24,
-                                ),
-                                SizedBox(width: 4,),
-                                Text("Meal"),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        InkWell(
-                          onTap: () {},
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.white12,
-                                width: 1,
-                              )
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.fastfood_rounded,
-                                  size: 24,
-                                ),
-                                SizedBox(width: 4,),
-                                Text("Meal"),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        InkWell(
-                          onTap: () {},
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.white12,
-                                width: 1,
-                              )
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.fastfood_rounded,
-                                  size: 24,
-                                ),
-                                SizedBox(width: 4,),
-                                Text("Meal"),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        InkWell(
-                          onTap: () {},
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.white12,
-                                width: 1,
-                              )
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.fastfood_rounded,
-                                  size: 24,
-                                ),
-                                SizedBox(width: 4,),
-                                Text("Meal"),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                      ],
-                    ),
-                  )
+                height: 50,
+                child: ListView.builder(
+                  itemBuilder: ((context, index) {
+                    final ExpenseCategory categoryList = categoryNameList[index];
+                    return Padding(
+                      padding: EdgeInsets.only(left: 4, right: 4),
+                      child: CategoryWidget(
+                        itemPosition: index,
+                        isSelected: selectedCategoryPosition == index,
+                        category: categoryList,
+                        onAreaClicked: (itemPosition){
+                          selectedCategoryPosition = itemPosition;
+                          setState(() {});
+                        },
+                      ),
+                    );
+                  }),
+                  itemCount: categoryNameList.length,
+                  scrollDirection: Axis.horizontal,
+                ),
+              ),
                 ],
               ),
             ),
@@ -331,18 +253,18 @@ class _HomePageState extends State<HomePage> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        // _insertExpense(
-                        //   "",
-                        //   "Meal",
-                        //   _nominalController.text,
-                        //   _descController.text,
-                        //   ,
-                        //   monthCode,
-                        //   dailyCode,
-                        //   uid,
-                        //   timestamp,
-                        //   updated_at,
-                        //   context),
+                        _insertExpense(
+                          "",
+                          categoryNameList[selectedCategoryPosition].name,
+                          _nominalController.text,
+                          _descController.text,
+                          dateText,
+                          monthlyDateCode,
+                          dailyDateCode,
+                          FirebaseUtil.getUID(),
+                          "",
+                          "",
+                          context);
                       },
                       child: Text(
                           "Save"
@@ -457,12 +379,18 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> showDatePicker() async {
-    // var result = await showDatePicker(
-    //     context: context,
-    //     initialDate: DateTime.now(),
-    //     firstDate: DateTime(DateTime.now().year-1),
-    //     lastDate: DateTime(DateTime.now().year+1));
+  Future<void> showDate() async {
+    var result = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(DateTime.now().year-1),
+        lastDate: DateTime(DateTime.now().year+1));
+    if (result != null) {
+      dateText = "${result.year}-${result.month}-${result.day}";
+      dailyDateCode = "${result.day}-${result.month}-${result.year}";
+      monthlyDateCode = "${result.month}-${result.year}";
+      setState(() {});
+    }
   }
 
   Future<void> _insertExpense(String id, String category, String nominal, String desc, String date, String monthCode, String dailyCode, String uid, String timestamp, String updated_at, BuildContext context) async {
@@ -481,6 +409,9 @@ class _HomePageState extends State<HomePage> {
           updated_at: "")
       );
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Insert successful")));
+      _descController.clear();
+      _nominalController.clear();
+      dateText = "Select date";
     } else if (category == null && nominal == null && desc == null){
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Fill the inputs")));
     }
