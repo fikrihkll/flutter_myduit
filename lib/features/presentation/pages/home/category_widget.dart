@@ -25,7 +25,7 @@ class CategoryWidget extends StatelessWidget {
             border: isSelected ?
             Border.all(
               color: Colors.lightBlue,
-              width: 2,
+              width: 1,
             )
                 : Border.all(
               color: Colors.white12,
