@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:myduit/core/firebase_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myduit/features/data/models/expense_model.dart';
+import 'package:myduit/features/data/models/summary_expense_model.dart';
 import 'package:myduit/features/data/repositories/expense_repository.dart';
 import 'package:myduit/features/presentation/pages/home/category_widget.dart';
 import 'package:myduit/features/presentation/pages/home/log_widget.dart';
@@ -27,6 +28,8 @@ class _HomePageState extends State<HomePage> {
   int selectedCategoryPosition = -1;
 
   List<ExpenseModel> listExpense = [];
+  SummaryExpenseModel dailyExpense = SummaryExpenseModel(id: "", nominal: 0, updatedAt: "", userId: "");
+  SummaryExpenseModel monthlyExpense = SummaryExpenseModel(id: "", nominal: 0, updatedAt: "", userId: "");
 
   @override
   void initState() {
@@ -37,7 +40,9 @@ class _HomePageState extends State<HomePage> {
         firebaseAuth: FirebaseAuth.instance
     );
     name = FirebaseAuth.instance.currentUser!.displayName;
-    fetchData();
+    fetchLogData();
+    fetchDailyExpenseData();
+    fetchMonthlyExpenseData();
   }
 
   Widget _helloUser(){
@@ -48,11 +53,18 @@ class _HomePageState extends State<HomePage> {
         children: [
           Column(
             children: [
-              Text(
-                "Hello, $name glad to see you back!",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+              GestureDetector(
+                onTap: () async {
+                  await FirebaseAuth.instance.signOut();
+                  if (!mounted) return;
+                  Navigator.pushNamedAndRemoveUntil(context, route.loginPage, (route)=> false);
+                },
+                child: Text(
+                  "Hello, $name glad to see you back!",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -64,9 +76,9 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildTodayExpense(){
     return InkWell(
-      borderRadius: BorderRadius.all(Radius.circular(16)),
+      borderRadius: const BorderRadius.all(Radius.circular(16)),
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.black38,
           borderRadius: BorderRadius.all(Radius.circular(16)),
         ),
@@ -77,7 +89,7 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Column(
-                children:[
+                children: const [
                   Text(
                     "Today's expense",
                     style: TextStyle(
@@ -86,10 +98,10 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
-              SizedBox(height: 32,),
+              const SizedBox(height: 32,),
               Column(
                 children: [
-                  Text("Rp 12.000"),
+                  Text("Rp ${dailyExpense.nominal}"),
                 ],
               ),
             ],
@@ -102,9 +114,9 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildThisMonthExpense(){
     return InkWell(
-      borderRadius: BorderRadius.all(Radius.circular(16)),
+      borderRadius: const BorderRadius.all(Radius.circular(16)),
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.black38,
           borderRadius: BorderRadius.all(Radius.circular(16)),
         ),
@@ -115,7 +127,7 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Row(
-                children:[
+                children: const [
                   Text(
                     "This month's expense",
                     style: TextStyle(
@@ -124,19 +136,19 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
-              SizedBox(height: 24,),
+              const SizedBox(height: 24,),
               Row(
                 children: [
                   Text(
-                    "Rp 12.000",
-                    style: TextStyle(
+                    "Rp ${monthlyExpense.nominal}",
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 24,),
+              const SizedBox(height: 24,),
               Row(
                 children: [
                   Expanded(
@@ -144,10 +156,8 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () {
                         Navigator.pushNamed(context, route.logPage);
                       },
-                      child: Text(
+                      child: const Text(
                           "Check Logs"
-                      ),
-                      style: ButtonStyle(
                       ),
                     ),
                   ),
@@ -157,13 +167,12 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      onTap: () {},
     );
   }
 
   Widget _buildInsertExpense(){
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.black38,
         borderRadius: BorderRadius.all(Radius.circular(16)),
       ),
@@ -338,8 +347,26 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> fetchData() async {
-    listExpense = await expenseRepository.getCurrentExpense(10);
+  Future<void> fetchDailyExpenseData() async {
+    var res = await expenseRepository.getDailyExpense();
+    if (res != null) {
+      dailyExpense = res;
+    }
+    setState(() {
+    });
+  }
+
+  Future<void> fetchMonthlyExpenseData() async {
+    var res = await expenseRepository.getMonthlyExpense();
+    if (res != null) {
+      monthlyExpense = res;
+    }
+    setState(() {
+    });
+  }
+
+  Future<void> fetchLogData() async {
+    listExpense = await expenseRepository.getCurrentExpense(3);
     setState(() {
     });
   }
@@ -349,7 +376,9 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
-          await fetchData();
+          fetchLogData();
+          fetchDailyExpenseData();
+          await fetchMonthlyExpenseData();
       },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -391,7 +420,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _insertExpense(String id, String category, String nominal, String desc, String date, String monthCode, String dailyCode, String uid, String timestamp, String updated_at, BuildContext context) async {
     if (category != null && nominal != null && desc != null) {
-      await expenseRepository.storeInsertExpense(
+      var res = await expenseRepository.storeInsertExpense(
         ExpenseModel(
           id: id,
           category: category,
@@ -404,11 +433,13 @@ class _HomePageState extends State<HomePage> {
           timestamp: "",
           updated_at: "")
       );
-      fetchData();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Insert successful")));
-      // _descController.clear();
-      // _nominalController.clear();
-      // dateText = "Select date";
+      if (res) {
+        fetchLogData();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Insert successful")));
+        // _descController.clear();
+        // _nominalController.clear();
+        // dateText = "Select date";
+      }
     } else if (category == null && nominal == null && desc == null){
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Fill the inputs")));
     }

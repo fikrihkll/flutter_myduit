@@ -27,6 +27,7 @@ class _UpdateLogState extends State<UpdateLog> {
   late String dailyDateCode;
   late ExpenseRepository expenseRepository;
   bool _isLoadingUpdate = false;
+  bool _isLoadingDelete = false;
 
   Future<void> showDate() async {
     var result = await showDatePicker(
@@ -92,12 +93,34 @@ class _UpdateLogState extends State<UpdateLog> {
     );
   }
 
+  Future<void> _deleteData() async {
+    _isLoadingDelete = true;
+    setState(() {
+
+    });
+    var success = await expenseRepository.deleteLog(
+        widget.expenseModel,
+    );
+    if (!mounted) return;
+    if (!success) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Upss.. There is something wrong!")));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Delete success")));
+    }
+    _isLoadingDelete = false;
+    setState(() {
+
+    });
+    Navigator.pop(context);
+  }
+
   Future<void> _updateData() async {
     _isLoadingUpdate = true;
     setState(() {
 
     });
     var success = await expenseRepository.updateExpense(
+        widget.expenseModel,
         ExpenseModel(
             id: widget.expenseModel.id,
             category: categoryNameList[selectedCategoryPosition].name,
@@ -221,7 +244,6 @@ class _UpdateLogState extends State<UpdateLog> {
             ),
             const SizedBox(height: 24,),
             InkWell(
-              onTap: () {},
               borderRadius: BorderRadius.circular(12),
               child: Row(
                 children: [
@@ -246,7 +268,30 @@ class _UpdateLogState extends State<UpdateLog> {
                   ),
                 ],
               ),
-            )
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: Visibility(
+                    visible: !_isLoadingDelete,
+                    replacement: const Center(
+                      child: CupertinoActivityIndicator(),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _deleteData();
+                      },
+                      style: const ButtonStyle(
+
+                      ),
+                      child: const Text(
+                          "Delete"
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
