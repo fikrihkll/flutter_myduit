@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myduit/features/data/models/expense_model.dart';
 import 'package:intl/intl.dart';
-import 'package:myduit/features/presentation/pages/update_page.dart';
+import 'package:myduit/features/presentation/pages/update/update_page.dart';
 
 class LogWidget extends StatelessWidget {
 
