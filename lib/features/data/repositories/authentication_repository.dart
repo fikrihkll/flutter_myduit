@@ -15,13 +15,6 @@ class AuthenticationRepository {
     }
   }
 
-  Future<dynamic> getUserName(String? email) async {
-    await firestore.collection("users")
-        .where("email", isEqualTo: email)
-        .get()
-    ;
-  }
-
   Future<bool> storeNewUserData(UserModel model) async {
     bool result = false;
     try {

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:myduit/core/firebase_util.dart';
 import 'package:myduit/features/data/models/user_model.dart';
@@ -72,34 +73,26 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _createRegisterButton() {
-    return Column(
-      children: [
-        ElevatedButton(
-            onPressed: () {
-              _registerUser(Navigator.of(context), _nameController.text,
-                  _emailController.text, _passController.text);
-            },
-            child: const Text(
-              "Register",
-              style: TextStyle(color: Colors.white),
-            )),
-      ],
-    );
+    return ElevatedButton(
+        onPressed: () {
+          _registerUser(Navigator.of(context), _nameController.text,
+              _emailController.text, _passController.text);
+        },
+        child: const Text(
+          "Register",
+          style: TextStyle(color: Colors.white),
+        ));
   }
 
   Widget _createLoginButton() {
-    return Column(
-      children: [
-        ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pushNamed(route.loginPage);
-            },
-            child: const Text(
-              "Login",
-              style: TextStyle(color: Colors.white),
-            )),
-      ],
-    );
+    return ElevatedButton(
+        onPressed: () {
+          Navigator.of(context).pushNamed(route.loginPage);
+        },
+        child: const Text(
+          "Login",
+          style: TextStyle(color: Colors.white),
+        ));
   }
 
   @override
@@ -115,8 +108,17 @@ class _RegisterPageState extends State<RegisterPage> {
               _createNameInput(),
               _createEmailInput(),
               _createPasswordInput(),
-              _createRegisterButton(),
-              _createLoginButton(),
+              SizedBox(height: 12,),
+              Row(
+                children: [
+                  Expanded(child: _createRegisterButton()),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(child: _createLoginButton()),
+                ],
+              ),
             ],
           ),
         )),
@@ -128,6 +130,7 @@ class _RegisterPageState extends State<RegisterPage> {
     var result = await FirebaseUtil.signUpEmailPassword(email, password, context);
     if (result != null) {
       var user = result.user!;
+      await FirebaseAuth.instance.currentUser!.updateDisplayName(name);
       await authenticationRepository.storeNewUserData(
           UserModel(id: user.uid, name: name, email: user.email!, timestamp: "")
       );
