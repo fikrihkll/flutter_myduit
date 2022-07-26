@@ -151,13 +151,13 @@ class _LoginPageState extends State<LoginPage> {
     var result = await FirebaseUtil.signInWithGoogle();
     if (result != null && result.user != null && result.user!.email != null) {
       if (await authenticationRepository.isUserExist(result.user!.email!)) {
-        navigator.pushNamed(route.homePage);
+        navigator.pushNamedAndRemoveUntil(route.homePage, (route) => false,);
       } else {
         var user = result.user!;
         await authenticationRepository.storeNewUserData(
           UserModel(id: "", name: user.displayName!, email: user.email!, timestamp: "")
         );
-        navigator.pushNamed(route.homePage);
+        navigator.pushNamedAndRemoveUntil(route.homePage, (route) => false,);
       }
     }
   }

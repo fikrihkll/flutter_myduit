@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:myduit/core/firebase_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myduit/features/data/models/expense_model.dart';
@@ -45,70 +46,37 @@ class _HomePageState extends State<HomePage> {
     fetchMonthlyExpenseData();
   }
 
-  Widget _helloUser(){
-    return SafeArea(
-      top: true,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Column(
-            children: [
-              GestureDetector(
-                onTap: () async {
-                  await FirebaseAuth.instance.signOut();
-                  if (!mounted) return;
-                  Navigator.pushNamedAndRemoveUntil(context, route.loginPage, (route)=> false);
-                },
-                child: Text(
-                  "Hello, $name glad to see you back!",
+  Widget _buildTodayExpense(){
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.black38,
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Column(
+              children: const [
+                Text(
+                  "Today's expense",
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
                   ),
                 ),
-              ),
-            ],
-          )
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTodayExpense(){
-    return InkWell(
-      borderRadius: const BorderRadius.all(Radius.circular(16)),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.black38,
-          borderRadius: BorderRadius.all(Radius.circular(16)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Column(
-                children: const [
-                  Text(
-                    "Today's expense",
-                    style: TextStyle(
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32,),
-              Column(
-                children: [
-                  Text("Rp ${dailyExpense.nominal}"),
-                ],
-              ),
-            ],
-          ),
+              ],
+            ),
+            const SizedBox(height: 32,),
+            Column(
+              children: [
+                Text(NumberFormat.currency(locale: 'id', customPattern: '\u00a4 #,###').format(dailyExpense.nominal)),
+              ],
+            ),
+          ],
         ),
       ),
-      onTap: () {},
     );
   }
 
@@ -140,7 +108,7 @@ class _HomePageState extends State<HomePage> {
               Row(
                 children: [
                   Text(
-                    "Rp ${monthlyExpense.nominal}",
+                    NumberFormat.currency(locale: 'id', customPattern: '\u00a4 #,###').format(monthlyExpense.nominal),
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -274,7 +242,8 @@ class _HomePageState extends State<HomePage> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        _insertExpense(
+                        if (selectedCategoryPosition != -1 && _nominalController.text.isNotEmpty && _descController.text.isNotEmpty && dateText != "Select date") {
+                          _insertExpense(
                           "",
                           categoryNameList[selectedCategoryPosition].name,
                           _nominalController.text,
@@ -286,6 +255,9 @@ class _HomePageState extends State<HomePage> {
                           "",
                           "",
                           context);
+                        } else if (selectedCategoryPosition == -1 || _nominalController.text.isEmpty || _descController.text.isEmpty || dateText == "Select date"){
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Fill the empty input")));
+                        }
                       },
                       child: Text(
                           "Save"
@@ -374,6 +346,30 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.black12,
+        title: Text(
+          "Hello, $name!",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Good bye, $name!")));
+              Navigator.pushNamedAndRemoveUntil(context, route.loginPage, (route)=> false);
+            },
+            icon: Icon(
+              Icons.logout,
+            ),
+          ),
+        ],
+        elevation: 0,
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           fetchLogData();
@@ -387,8 +383,6 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _helloUser(),
-                SizedBox(height: 32,),
                 _buildTodayExpense(),
                 SizedBox(height: 12,),
                 _buildThisMonthExpense(),
@@ -419,7 +413,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _insertExpense(String id, String category, String nominal, String desc, String date, String monthCode, String dailyCode, String uid, String timestamp, String updated_at, BuildContext context) async {
-    if (category != null && nominal != null && desc != null) {
       var res = await expenseRepository.storeInsertExpense(
         ExpenseModel(
           id: id,
@@ -436,12 +429,10 @@ class _HomePageState extends State<HomePage> {
       if (res) {
         fetchLogData();
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Insert successful")));
-        // _descController.clear();
-        // _nominalController.clear();
-        // dateText = "Select date";
+        _descController.clear();
+        _nominalController.clear();
+        dateText = "Select date";
+        selectedCategoryPosition = -1;
       }
-    } else if (category == null && nominal == null && desc == null){
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Fill the inputs")));
-    }
   }
 }
