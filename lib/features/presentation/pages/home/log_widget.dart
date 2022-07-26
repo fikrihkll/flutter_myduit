@@ -35,7 +35,7 @@ class LogWidget extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "Rp. ${expense.nominal}",
+                  NumberFormat.currency(locale: 'id', customPattern: '\u00a4 #,###').format(expense.nominal),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
