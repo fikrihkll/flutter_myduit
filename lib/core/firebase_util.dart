@@ -80,7 +80,7 @@ class FirebaseUtil {
 
   static signOut() async {
     await FirebaseAuth.instance.signOut();
-
+    await GoogleSignIn().signOut();
   }
 
   static String getUID() {
